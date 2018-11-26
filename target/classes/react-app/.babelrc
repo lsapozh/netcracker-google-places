@@ -1,0 +1,12 @@
+{
+  "presets": [
+    "env",
+    "react"
+  ],
+  "plugins": [
+    "transform-decorators",
+    "transform-es2015-arrow-functions",
+    "transform-class-properties",
+    "transform-object-rest-spread"
+  ]
+}
