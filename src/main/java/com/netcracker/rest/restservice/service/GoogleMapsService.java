@@ -4,20 +4,18 @@ import com.google.maps.DistanceMatrixApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.PlacesApi;
 import com.google.maps.errors.ApiException;
-import com.google.maps.model.DistanceMatrix;
-import com.google.maps.model.LatLng;
-import com.google.maps.model.PlacesSearchResponse;
-import com.google.maps.model.PlacesSearchResult;
+import com.google.maps.model.*;
 import com.netcracker.rest.restservice.model.Place;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.SplittableRandom;
+import java.util.*;
 
-@Slf4j
+import static org.joda.time.DateTimeConstants.MINUTES_PER_HOUR;
+import static org.joda.time.DateTimeConstants.SECONDS_PER_MINUTE;
+
 @Service
 public class GoogleMapsService {
 
@@ -44,7 +42,7 @@ public class GoogleMapsService {
      * @return a Place object
      */
     public Place findLuckyPlace(String lat, String lng) throws InterruptedException, ApiException, IOException {
-        LatLng currentPosition = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+        LatLng currentPosition = detectCurrentPosition(lat, lng);
         PlacesSearchResponse placesSearchResponse = PlacesApi.nearbySearchQuery(context, currentPosition)
                 .radius(MAX_ALLOWED_RADIUS).await();
         int placeNumber = getIntRandomNumberInRange(LOWER_BOUND_FOR_RANDOM_GEN, UPPER_BOUND_FOR_RANDOM_GEN);
@@ -59,22 +57,89 @@ public class GoogleMapsService {
                 .origins(currentPosition)
                 .destinations(result.geometry.location)
                 .await();
-        // Using distance value from Matrix in meters
-        long priceToGetToPlace = (long) (matrix.rows[0].elements[0].distance.inMeters *
+
+        DistanceMatrixElement distanceMatrixElement = matrix.rows[0].elements[0];
+
+        return createPlace(result, distanceMatrixElement);
+    }
+
+    public List<Place> findPlaces(String lat, String lng, int radius, String type, int duration) throws InterruptedException,
+            ApiException, IOException {
+        List<Place> places = new ArrayList<>();
+        long hoursInSeconds = duration * MINUTES_PER_HOUR * SECONDS_PER_MINUTE;
+        LatLng currentPosition = detectCurrentPosition(lat, lng);
+        PlacesSearchResponse placesSearchResponse = PlacesApi.nearbySearchQuery(context, currentPosition).
+                radius(radius).
+                type(PlaceType.valueOf(type.toUpperCase())).
+                await();
+
+        places.addAll(filterDuration(placesSearchResponse, currentPosition, hoursInSeconds));
+        /*
+          A nextPageToken can be used to request up to 20 additional results. This field will be null if
+          there are no further results. The maximum number of results that can be returned is 60.
+        */
+        while (placesSearchResponse != null && placesSearchResponse.nextPageToken != null) {
+            placesSearchResponse = PlacesApi.nearbySearchNextPage(context, placesSearchResponse.nextPageToken)
+                    .awaitIgnoreError();
+            if(placesSearchResponse != null) {
+                places.addAll(filterDuration(placesSearchResponse, currentPosition, hoursInSeconds));
+            }
+        }
+        return places;
+    }
+
+    private List<Place> filterDuration(PlacesSearchResponse placesSearchResponse, LatLng currentPosition,
+                                       long durationInSeconds) throws InterruptedException, ApiException, IOException {
+        PlacesSearchResult[] searchResults = placesSearchResponse.results;
+        int placesCount = searchResults.length;
+        if(placesCount == 0) {
+            return Collections.emptyList();
+        }
+        // An array of locations, represented by a latitude/longitude pairs
+        LatLng[] locations = Arrays.stream(searchResults)
+                .map(s -> s.geometry.location)
+                .toArray(LatLng[]::new);
+
+        DistanceMatrix matrix = DistanceMatrixApi.newRequest(context)
+                .origins(currentPosition)
+                .destinations(locations)
+                .await();
+
+        List<Place> places = new ArrayList<>();
+        int i = 0;
+        for (PlacesSearchResult result : searchResults) {
+            DistanceMatrixElement destinationPlace = matrix.rows[0].elements[i++];
+            if (destinationPlace.duration.inSeconds < durationInSeconds) {
+                Place place = createPlace(result, destinationPlace);
+                places.add(place);
+            }
+        }
+        return places;
+    }
+
+    private static long getPriceToGetToPlace(DistanceMatrixElement distanceMatrixElement) {
+        return (long) (distanceMatrixElement.distance.inMeters *
                 AVERAGE_PRICE_OF_GASOLINE / METERS_PER_KM * AVERAGE_CONSUMPTION_PER_KM);
+    }
+
+    private static LatLng detectCurrentPosition(String lat, String lng) {
+        return new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+    }
+
+    private static int getIntRandomNumberInRange(int min, int max) {
+        return new SplittableRandom().nextInt(min, max);
+    }
+
+    private Place createPlace(PlacesSearchResult result, DistanceMatrixElement destinationPlace) {
         return new Place(result.geometry.location.lat,
                 result.geometry.location.lng,
                 result.name,
                 result.vicinity,
                 result.icon,
-                matrix.rows[0].elements[0].duration,
-                matrix.rows[0].elements[0].distance,
-                BigDecimal.valueOf(priceToGetToPlace * 2)
+                destinationPlace.duration,
+                destinationPlace.distance,
+                BigDecimal.valueOf(getPriceToGetToPlace(destinationPlace) * 2)
         );
-    }
-
-    private static int getIntRandomNumberInRange(int min, int max) {
-        return new SplittableRandom().nextInt(min, max);
     }
 
 }
