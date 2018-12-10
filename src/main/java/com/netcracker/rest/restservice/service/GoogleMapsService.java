@@ -81,7 +81,7 @@ public class GoogleMapsService {
         while (placesSearchResponse != null && placesSearchResponse.nextPageToken != null) {
             placesSearchResponse = PlacesApi.nearbySearchNextPage(context, placesSearchResponse.nextPageToken)
                     .awaitIgnoreError();
-            if(placesSearchResponse != null) {
+            if (placesSearchResponse != null) {
                 places.addAll(filterDuration(placesSearchResponse, currentPosition, hoursInSeconds));
             }
         }
@@ -89,10 +89,10 @@ public class GoogleMapsService {
     }
 
     private List<Place> filterDuration(PlacesSearchResponse placesSearchResponse, LatLng currentPosition,
-                                        long durationInSeconds) throws InterruptedException, ApiException, IOException {
+                                       long durationInSeconds) throws InterruptedException, ApiException, IOException {
         PlacesSearchResult[] searchResults = placesSearchResponse.results;
         int placesCount = searchResults.length;
-        if(placesCount == 0) {
+        if (placesCount == 0) {
             return Collections.emptyList();
         }
         // An array of locations, represented by a latitude/longitude pairs
@@ -141,5 +141,4 @@ public class GoogleMapsService {
                 BigDecimal.valueOf(getPriceToGetToPlace(destinationPlace) * 2)
         );
     }
-
 }

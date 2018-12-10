@@ -5,7 +5,6 @@ import com.netcracker.rest.restservice.model.Place;
 import com.netcracker.rest.restservice.service.GoogleMapsService;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
@@ -29,6 +28,10 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 @RestController
 @RequestMapping(value = "api/places")
 public class GoogleMapsController {
+    private static final String LUCKY_INDEX = "lucky_index";
+    private static final String LUCKY_PLACE_TYPE = "luckyPlace";
+    private static final String PLACE_INDEX = "place_index";
+    private static final String PLACES_TYPE = "places";
 
     private final GoogleMapsService googleMapsService;
 
@@ -59,10 +62,7 @@ public class GoogleMapsController {
         }
 
         // logging to ElasticSearch
-        loggingData(json, "luckyPlace");
-
-        String j1 = Strings.toString(json);
-        System.out.println(j1);
+        loggingData(json, LUCKY_PLACE_TYPE, LUCKY_INDEX);
 
         return Collections.singletonList(luckyPlace);
     }
@@ -70,7 +70,7 @@ public class GoogleMapsController {
     @RequestMapping(value = "find", method = RequestMethod.GET)
     public List<Place> findPlaces(@RequestParam(name = "lat") String lat,
                                   @RequestParam(name = "lng") String lng,
-                                  @RequestParam(name = "radius", defaultValue = "3000") Integer radius,
+                                  @RequestParam(name = "radius", defaultValue = "10000") Integer radius,
                                   @RequestParam(name = "duration", defaultValue = "10") Integer duration,
                                   @RequestParam(name = "type") String type,
                                   HttpServletRequest request) throws InterruptedException,
@@ -89,7 +89,7 @@ public class GoogleMapsController {
                     .field("date", new Date())
                     .field("IP", request.getLocalAddr())
                     .endObject();
-            Thread secondThread = new Thread(() -> loggingData(json, "places"));
+            Thread secondThread = new Thread(() -> loggingData(json, PLACES_TYPE, PLACE_INDEX));
             secondThread.start();
         } catch (Exception e) {
             e.printStackTrace();
@@ -99,7 +99,7 @@ public class GoogleMapsController {
     }
 
     //loggingData
-    private void loggingData(XContentBuilder json, String type) {
+    private void loggingData(XContentBuilder json, String type, String index) {
         TransportClient client = null;
         try {
             client = new PreBuiltTransportClient(Settings.EMPTY)
@@ -108,14 +108,20 @@ public class GoogleMapsController {
             e.printStackTrace();
         }
 
+        prepareElasticIndex(json, type, client, index);
+        if (client != null) {
+            client.close();
+        }
+    }
+
+    private void prepareElasticIndex(XContentBuilder json, String type, TransportClient client, String index) {
         try {
             assert client != null;
-            IndexResponse response = client.prepareIndex("lucky_index", type)
+            IndexResponse response = client.prepareIndex(index, type)
                     .setSource(json)
                     .get();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        client.close();
     }
 }
