@@ -89,7 +89,7 @@ public class GoogleMapsService {
     }
 
     private List<Place> filterDuration(PlacesSearchResponse placesSearchResponse, LatLng currentPosition,
-                                       long durationInSeconds) throws InterruptedException, ApiException, IOException {
+                                        long durationInSeconds) throws InterruptedException, ApiException, IOException {
         PlacesSearchResult[] searchResults = placesSearchResponse.results;
         int placesCount = searchResults.length;
         if(placesCount == 0) {
