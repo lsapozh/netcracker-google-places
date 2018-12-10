@@ -261,7 +261,9 @@ class SearchPlacesPage extends Component {
 
                 // Load the Google Maps API
                 const script = document.createElement('script')
-                script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_KEY}&libraries=places&callback=resolveGoogleMapsPromise`
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${
+                    process.env.GOOGLE_KEY
+                }&libraries=places&callback=resolveGoogleMapsPromise`
                 script.async = true
                 document.body.appendChild(script)
             })
