@@ -4,9 +4,12 @@ import TextField from '@material-ui/core/TextField/TextField'
 import Grid from '@material-ui/core/Grid'
 import Button from '@material-ui/core/Button'
 import TicketsList from '../TicketsList'
+import { DatePicker } from 'material-ui-pickers'
 
 const SearchTicketsPageView = ({
     handleChange,
+    handleDepartDateChange,
+    handleReturnDateChange,
     departureCity,
     arrivalCity,
     departureDate,
@@ -42,21 +45,61 @@ const SearchTicketsPageView = ({
                     />
                 </Grid>
                 <Grid item>
-                    <TextField
-                        name={'departureDate'}
-                        label="Depart"
+                    <DatePicker
+                        keyboard
+                        format="dd/MM/yyyy"
+                        placeholder="10/10/2018"
+                        mask={value =>
+                            value
+                                ? [
+                                      /\d/,
+                                      /\d/,
+                                      '/',
+                                      /\d/,
+                                      /\d/,
+                                      '/',
+                                      /\d/,
+                                      /\d/,
+                                      /\d/,
+                                      /\d/,
+                                  ]
+                                : []
+                        }
                         value={departureDate}
-                        onChange={handleChange}
-                        margin="normal"
+                        onChange={handleDepartDateChange}
+                        name={'departureDate'}
+                        label={'Depart'}
+                        showTodayButton
+                        animateYearScrolling
                     />
                 </Grid>
                 <Grid item>
-                    <TextField
-                        name={'returnDate'}
-                        label="Return"
+                    <DatePicker
+                        keyboard
+                        format="dd/MM/yyyy"
+                        placeholder="10/10/2018"
+                        mask={value =>
+                            value
+                                ? [
+                                      /\d/,
+                                      /\d/,
+                                      '/',
+                                      /\d/,
+                                      /\d/,
+                                      '/',
+                                      /\d/,
+                                      /\d/,
+                                      /\d/,
+                                      /\d/,
+                                  ]
+                                : []
+                        }
                         value={returnDate}
-                        onChange={handleChange}
-                        margin="normal"
+                        onChange={handleReturnDateChange}
+                        name={'returnDate'}
+                        label={'Return'}
+                        showTodayButton
+                        animateYearScrolling
                     />
                 </Grid>
                 <Grid item>
