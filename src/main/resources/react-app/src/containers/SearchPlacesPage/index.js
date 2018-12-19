@@ -212,7 +212,7 @@ class SearchPlacesPage extends Component {
     }
 
     onLuckySearch = () => {
-        fetch(`/api/places/findLucky?lat=50&lng=45`)
+        fetch(`/api/places/findLucky?lat=53&lng=50`)
             .then(response => response.json())
             .then(data => this.onDataLoad(data))
     }

@@ -1,6 +1,5 @@
 var express = require('express');
 var path = require('path');
-// var jsonServer = require('json-server')
 var app = express();
 
 app.use(express.json());
