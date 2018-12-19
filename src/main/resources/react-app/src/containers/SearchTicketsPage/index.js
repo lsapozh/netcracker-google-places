@@ -45,7 +45,7 @@ class SearchTicketsPage extends Component {
         })
             .then(response => response.json())
             .then(data => this.getTickets(data))
-            .catch(reason => this.setState({ ticketsNotFound: true }, () => console.log(this.state)))
+            .catch(reason => this.setState({ ticketsNotFound: true }))
     }
 
     getTickets = data => {
@@ -119,33 +119,42 @@ class SearchTicketsPage extends Component {
         return fetch(url, {
             headers: {
                 'X-RapidAPI-Key':
-                    'Td24bfq18lmsh5KqGTIsh6amrNJRp1h4MngjsnIdn2a8CFcrl5',
+                'd8feb41877msha2eca9d57d913cap172a98jsn9481446e52eb'
+                    // 'Td24bfq18lmsh5KqGTIsh6amrNJRp1h4MngjsnIdn2a8CFcrl5',
             },
         })
             .then(response => response.json())
             .then(data => data.Places[0].PlaceId)
     }
 
-    // onSearch = () => {
-    //     this.getTickets(data)
-    // }
-
-    onSearch = () => {
-        const departureDateFormat = this.formatDate(this.state.departureDate)
-        const returnDateFormat = this.formatDate(this.state.returnDate)
-
-        Promise.all([
-            this.getAirportId(this.state.departureCity),
-            this.getAirportId(this.state.arrivalCity),
-        ]).then(([departureAirport, arrivalAirport]) => {
-            this.loadData({
-                departureAirport,
-                arrivalAirport,
-                departureDateFormat,
-                returnDateFormat,
-            })
+    clearResults = () => {
+        this.setState({
+            tickets: null,
+            ticketsNotFound: false,
         })
     }
+
+    onSearch = () => {
+        this.getTickets(data)
+    }
+
+    // onSearch = () => {
+    //     this.clearResults()
+    //     const departureDateFormat = this.formatDate(this.state.departureDate)
+    //     const returnDateFormat = this.formatDate(this.state.returnDate)
+    //
+    //     Promise.all([
+    //         this.getAirportId(this.state.departureCity),
+    //         this.getAirportId(this.state.arrivalCity),
+    //     ]).then(([departureAirport, arrivalAirport]) => {
+    //         this.loadData({
+    //             departureAirport,
+    //             arrivalAirport,
+    //             departureDateFormat,
+    //             returnDateFormat,
+    //         })
+    //     })
+    // }
 
     // onSearch2 = async () => {
     //     const departureDateFormat = this.formatDate(this.state.departureDate)
