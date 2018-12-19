@@ -11,6 +11,7 @@ class SearchPlacesPage extends Component {
         placeType: '',
         initLat: null,
         initLng: null,
+        markers: []
     }
 
     handleChange = event => {
@@ -43,30 +44,44 @@ class SearchPlacesPage extends Component {
     }
 
     onSearch = () => {
+        this.removeMarkers()
         fetch(
             `api/places/find?lat=${this.state.initLat()}&lng=${this.state.initLng()}&radius=${
                 this.state.radius
-            }&duration=${this.state.duration}&type=${
-                this.state.placeType
-            }`,
+            }&duration=${this.state.duration}&type=${this.state.placeType}`,
         )
             .then(response => response.json())
             .then(data => this.onDataLoad(data))
     }
 
     onLuckySearch = () => {
-        fetch(`/api/places/findLucky?lat=50&lng=45`)
+        this.removeMarkers()
+        const lat = this.randomInteger(45, 60)
+        const lng = this.randomInteger(45, 55)
+        console.log(lat, lng)
+        fetch(`/api/places/findLucky?lat=${lat}&lng=${lng}`)
             .then(response => response.json())
             .then(data => this.onDataLoad(data))
     }
 
+    randomInteger = (min, max) => {
+        let rand = min - 0.5 + Math.random() * (max - min + 1)
+        rand = Math.round(rand);
+        return rand;
+    }
+
+    removeMarkers = () => {
+       this.state.markers.forEach(m => m.setMap(null))
+    }
+
     renderPlacesOnMap = places => {
         const bounds = new google.maps.LatLngBounds()
+        let markers = []
         places.forEach(p => {
             let contentString = `
-                Name: ${p.name}<br>
-                Address: ${p.address}
-                `
+            Name: ${p.name}<br>
+            Address: ${p.address}
+            `
             let position = new google.maps.LatLng(p.lat, p.lng)
             let infoWindow = new google.maps.InfoWindow({
                 content: contentString,
@@ -82,9 +97,11 @@ class SearchPlacesPage extends Component {
             marker.addListener('mouseout', () => {
                 infoWindow.close(this.state.map, marker)
             })
+            markers.push(marker)
             bounds.extend(position)
             this.state.map.fitBounds(bounds)
         })
+        this.setState({markers})
     }
 
     getGoogleMaps() {
@@ -102,7 +119,10 @@ class SearchPlacesPage extends Component {
 
                 // Load the Google Maps API
                 const script = document.createElement('script')
-                script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.GOOGLE_KEY}&libraries=places&callback=resolveGoogleMapsPromise`
+                // script.src = `https://maps.googleapis.com/maps/api/js?key=${
+                //     process.env.GOOGLE_KEY
+                // }&libraries=places&callback=resolveGoogleMapsPromise`
+                script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD7kYHwzqUSGOKSoTq13TB8iMhgxpDJXj0&libraries=places&callback=resolveGoogleMapsPromise`
                 script.async = true
                 document.body.appendChild(script)
             })

@@ -17,4 +17,10 @@ public class IndexController {
         model.addAttribute("apiKey", apiKey);
         return "index";
     }
+
+    @RequestMapping(value = {"/search-tickets"}, method = RequestMethod.GET)
+    public String tickets(Model model) {
+        model.addAttribute("apiKey", apiKey);
+        return "index";
+    }
 }
