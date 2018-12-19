@@ -1,163 +1,6 @@
 import React, { Component } from 'react'
 import Page from '../../components/Page'
 import SearchPlacesPageView from '../../components/SearchPlacesPageView'
-const dataTest = [
-    {
-        name: 'Place 1',
-        address: 'Address 1',
-        distance: {
-            humanReadable: '1 km',
-            inMeters: 1000,
-        },
-        duration: {
-            humanReadable: '10 min',
-            inSeconds: 600,
-        },
-        lat: 53.2,
-        lng: 49.5,
-    },
-    {
-        name: 'Place 2',
-        address: 'Address 2',
-        distance: {
-            humanReadable: '2 km',
-            inMeters: 2000,
-        },
-        duration: {
-            humanReadable: '11 min',
-            inSeconds: 660,
-        },
-        lat: 53.2,
-        lng: 49.6,
-    },
-    {
-        name: 'Place 3',
-        address: 'Address 3',
-        distance: {
-            humanReadable: '1.5 km',
-            inMeters: 1500,
-        },
-        duration: {
-            humanReadable: '7 min',
-            inSeconds: 420,
-        },
-        lat: 53.2,
-        lng: 49.7,
-    },
-    {
-        name: 'Place 4',
-        address: 'Address 4',
-        distance: {
-            humanReadable: '1.8 km',
-            inMeters: 1800,
-        },
-        duration: {
-            humanReadable: '13 min',
-            inSeconds: 780,
-        },
-        lat: 53.2,
-        lng: 49.8,
-    },
-    {
-        name: 'Place 5',
-        address: 'Address 5',
-        distance: {
-            humanReadable: '3 km',
-            inMeters: 3000,
-        },
-        duration: {
-            humanReadable: '20 min',
-            inSeconds: 1200,
-        },
-        lat: 53.2,
-        lng: 49.9,
-    },
-    {
-        name: 'Place 5',
-        address: 'Address 5a',
-        distance: {
-            humanReadable: '6 km',
-            inMeters: 6000,
-        },
-        duration: {
-            humanReadable: '40 min',
-            inSeconds: 2400,
-        },
-        lat: 53.2,
-        lng: 50,
-    },
-    {
-        name: 'Place 7',
-        address: 'Address 7',
-        distance: {
-            humanReadable: '2.1 km',
-            inMeters: 2100,
-        },
-        duration: {
-            humanReadable: '16 min',
-            inSeconds: 960,
-        },
-        lat: 53.2,
-        lng: 50.1,
-    },
-    {
-        name: 'Place 8',
-        address: 'Address 8',
-        distance: {
-            humanReadable: '0.5 km',
-            inMeters: 500,
-        },
-        duration: {
-            humanReadable: '5 min',
-            inSeconds: 300,
-        },
-        lat: 53.2,
-        lng: 50.2,
-    },
-    {
-        name: 'Place 9',
-        address: 'Address 9',
-        distance: {
-            humanReadable: '1.2 km',
-            inMeters: 1200,
-        },
-        duration: {
-            humanReadable: '8 min',
-            inSeconds: 480,
-        },
-        lat: 53.2,
-        lng: 50.3,
-    },
-    {
-        name: 'Place 10',
-        address: 'Address 10',
-        distance: {
-            humanReadable: '0.1 km',
-            inMeters: 100,
-        },
-        duration: {
-            humanReadable: '1 min',
-            inSeconds: 60,
-        },
-        lat: 53.2,
-        lng: 50.4,
-    },
-    {
-        name: 'Place 11',
-        address: 'Address 11',
-        distance: {
-            humanReadable: '1 km',
-            inMeters: 1000,
-        },
-        duration: {
-            humanReadable: '10 min',
-            inSeconds: 600,
-        },
-        lat: 53.2,
-        lng: 50.5,
-    },
-]
-
 
 class SearchPlacesPage extends Component {
     state = {
@@ -209,15 +52,22 @@ class SearchPlacesPage extends Component {
         )
             .then(response => response.json())
             .then(data => this.onDataLoad(data))
-
-        // this.onDataLoad(dataTest)
     }
 
     onLuckySearch = () => {
         this.removeMarkers()
-        fetch(`/api/places/findLucky?lat=53&lng=50`)
+        const lat = this.randomInteger(45, 60)
+        const lng = this.randomInteger(45, 55)
+        console.log(lat, lng)
+        fetch(`/api/places/findLucky?lat=${lat}&lng=${lng}`)
             .then(response => response.json())
             .then(data => this.onDataLoad(data))
+    }
+
+    randomInteger = (min, max) => {
+        let rand = min - 0.5 + Math.random() * (max - min + 1)
+        rand = Math.round(rand);
+        return rand;
     }
 
     removeMarkers = () => {
@@ -269,10 +119,10 @@ class SearchPlacesPage extends Component {
 
                 // Load the Google Maps API
                 const script = document.createElement('script')
-                script.src = `https://maps.googleapis.com/maps/api/js?key=${
-                    process.env.GOOGLE_KEY
-                }&libraries=places&callback=resolveGoogleMapsPromise`
-                // script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD7kYHwzqUSGOKSoTq13TB8iMhgxpDJXj0&libraries=places&callback=resolveGoogleMapsPromise`
+                // script.src = `https://maps.googleapis.com/maps/api/js?key=${
+                //     process.env.GOOGLE_KEY
+                // }&libraries=places&callback=resolveGoogleMapsPromise`
+                script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyD7kYHwzqUSGOKSoTq13TB8iMhgxpDJXj0&libraries=places&callback=resolveGoogleMapsPromise`
                 script.async = true
                 document.body.appendChild(script)
             })
