@@ -58,7 +58,6 @@ class SearchPlacesPage extends Component {
         this.removeMarkers()
         const lat = this.randomInteger(45, 60)
         const lng = this.randomInteger(45, 55)
-        console.log(lat, lng)
         fetch(`/api/places/findLucky?lat=${lat}&lng=${lng}`)
             .then(response => response.json())
             .then(data => this.onDataLoad(data))
