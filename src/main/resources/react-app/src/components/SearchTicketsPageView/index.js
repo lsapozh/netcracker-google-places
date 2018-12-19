@@ -5,6 +5,7 @@ import Grid from '@material-ui/core/Grid'
 import Button from '@material-ui/core/Button'
 import TicketsList from '../TicketsList'
 import { DatePicker } from 'material-ui-pickers'
+import Typography from '@material-ui/core/Typography'
 
 const SearchTicketsPageView = ({
     handleChange,
@@ -16,6 +17,7 @@ const SearchTicketsPageView = ({
     returnDate,
     onSearch,
     tickets,
+    ticketsNotFound,
 }) => (
     <Paper style={{ padding: '20px 30px' }}>
         <form style={{ padding: '20px 30px' }}>
@@ -116,7 +118,13 @@ const SearchTicketsPageView = ({
             </Grid>
         </form>
 
-        {/*{tickets ? <TicketsList tickets={tickets} /> : null}*/}
+        {tickets ? <TicketsList tickets={tickets} /> : null}
+        {console.log(ticketsNotFound, "ticketsNotFound")}
+        {ticketsNotFound ? (
+            <Typography component="h2" variant="display1" style={{padding: 30}}>
+                Tickets not found
+            </Typography>
+        ) : null}
     </Paper>
 )
 export default SearchTicketsPageView

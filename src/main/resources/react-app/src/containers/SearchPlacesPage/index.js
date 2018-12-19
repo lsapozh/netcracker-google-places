@@ -200,17 +200,15 @@ class SearchPlacesPage extends Component {
     }
 
     onSearch = () => {
-        // fetch(
-        //     `api/places/find?lat=${this.state.initLat()}&lng=${this.state.initLng()}&radius=${
-        //         this.state.radius
-        //     }&duration=${this.state.duration}&type=${
-        //         this.state.placeType
-        //     }`,
-        // )
-        //     .then(response => response.json())
-        //     .then(data => this.onDataLoad(data))
+        fetch(
+            `api/places/find?lat=${this.state.initLat()}&lng=${this.state.initLng()}&radius=${
+                this.state.radius
+            }&duration=${this.state.duration}&type=${this.state.placeType}`,
+        )
+            .then(response => response.json())
+            .then(data => this.onDataLoad(data))
 
-        this.onDataLoad(dataTest)
+        // this.onDataLoad(dataTest)
     }
 
     onLuckySearch = () => {

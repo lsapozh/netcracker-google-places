@@ -12,7 +12,8 @@ class SearchTicketsPage extends Component {
         arrivalCity: '',
         departureDate: new Date(),
         returnDate: new Date(),
-        tickets: data,
+        tickets: null,
+        ticketsNotFound: false,
     }
 
     handleChange = event => {
@@ -43,30 +44,62 @@ class SearchTicketsPage extends Component {
             },
         })
             .then(response => response.json())
-            .then(data => console.log(data))
+            .then(data => this.getTickets(data))
+            .catch(reason => this.setState({ ticketsNotFound: true }, () => console.log(this.state)))
     }
 
     getTickets = data => {
-        console.log('!!!')
-        let tickets = []
-        data.Quotes.map(quote => {
-            const price = quote.MinPrice
-            const direct = quote.Direct
-            // const outboundAirline = data.Carriers.find(carrier => carrier.CarrierId === quote.OutboundLeg.CarrierIds[0]).Name
-            // const inboundAirline = data.Carriers.find(carrier => carrier.CarrierId === quote.InboundLeg.CarrierIds[0]).Name
-            const departureDate = quote.OutboundLeg.DepartureDate
-            const returnDate = quote.InboundLeg.DepartureDate
-            const ticket = {
-                price,
-                direct,
-                outboundAirline,
-                inboundAirline,
-                departureDate,
-                returnDate,
-            }
-            tickets.push(ticket)
-        })
-        console.log(tickets)
+        if (data.Quotes.length === 0) {
+            this.setState({ ticketsNotFound: true })
+        } else {
+            let tickets = []
+            data.Quotes.map(quote => {
+                const price = quote.MinPrice
+                const direct = quote.Direct
+                const outboundAirline = data.Carriers.find(
+                    carrier =>
+                        carrier.CarrierId === quote.OutboundLeg.CarrierIds[0],
+                )
+                const outboundAirlineName = outboundAirline
+                    ? outboundAirline.Name
+                    : ''
+                const inboundAirline = data.Carriers.find(
+                    carrier => carrier.CarrierId === quote.InboundLeg.CarrierIds[0],
+                )
+                const inboundAirlineName = inboundAirline ? inboundAirline.Name : ''
+                const departureDate = quote.OutboundLeg.DepartureDate
+                const returnDate = quote.InboundLeg.DepartureDate
+                const currencySymbol = '$'
+                const outboundIataCode = data.Places.find(
+                    place => quote.OutboundLeg.DestinationId === place.PlaceId,
+                ).IataCode
+                const inboundIataCode = data.Places.find(
+                    place => quote.InboundLeg.DestinationId === place.PlaceId,
+                ).IataCode
+                const outboundPlaceName = data.Places.find(
+                    place => quote.OutboundLeg.DestinationId === place.PlaceId,
+                ).Name
+                const inboundPlaceName = data.Places.find(
+                    place => quote.InboundLeg.DestinationId === place.PlaceId,
+                ).Name
+                const ticket = {
+                    price,
+                    direct,
+                    outboundAirline: outboundAirlineName,
+                    inboundAirline: inboundAirlineName,
+                    departureDate,
+                    returnDate,
+                    currencySymbol,
+                    inboundIataCode,
+                    outboundIataCode,
+                    outboundPlaceName,
+                    inboundPlaceName,
+                }
+                tickets.push(ticket)
+            })
+            this.setState({ tickets })
+        }
+
     }
 
     formatDate = date => {
@@ -93,20 +126,25 @@ class SearchTicketsPage extends Component {
             .then(data => data.Places[0].PlaceId)
     }
 
+    // onSearch = () => {
+    //     this.getTickets(data)
+    // }
+
     onSearch = () => {
         const departureDateFormat = this.formatDate(this.state.departureDate)
         const returnDateFormat = this.formatDate(this.state.returnDate)
 
-        Promise.all([this.getAirportId(this.state.departureCity), this.getAirportId(this.state.arrivalCity)])
-            .then(([departureAirport, arrivalAirport]) => {
-                console.log(departureAirport, arrivalAirport)
-                this.loadData({
-                    departureAirport,
-                    arrivalAirport,
-                    departureDateFormat,
-                    returnDateFormat,
-                })
+        Promise.all([
+            this.getAirportId(this.state.departureCity),
+            this.getAirportId(this.state.arrivalCity),
+        ]).then(([departureAirport, arrivalAirport]) => {
+            this.loadData({
+                departureAirport,
+                arrivalAirport,
+                departureDateFormat,
+                returnDateFormat,
             })
+        })
     }
 
     // onSearch2 = async () => {
@@ -140,6 +178,7 @@ class SearchTicketsPage extends Component {
                         departureDate={this.state.departureDate}
                         returnDate={this.state.returnDate}
                         onSearch={this.onSearch}
+                        ticketsNotFound={this.state.ticketsNotFound}
                     />
                 }
                 dispatch={this.props.dispatch}
