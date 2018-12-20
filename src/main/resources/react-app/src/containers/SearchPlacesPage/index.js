@@ -11,7 +11,9 @@ class SearchPlacesPage extends Component {
         placeType: '',
         initLat: null,
         initLng: null,
-        markers: []
+        markers: [],
+        useCurrentLocation: false
+
     }
 
     handleChange = event => {
@@ -131,12 +133,30 @@ class SearchPlacesPage extends Component {
         return this.googleMapsPromise
     }
 
+    setCurrentLocation = event => {
+        this.setState({ useCurrentLocation: event.target.checked })
+        if (event.target.checked) {
+            this.setState({
+                location: "My location",
+                initLat: this.state.currentLatLng.lat,
+                initLng: this.state.currentLatLng.lng,
+            })
+        } else {
+            this.setState({
+                location: '',
+                initLat: null,
+                initLng: null,
+            })
+        }
+    }
+
     componentWillMount() {
         // Start Google Maps API loading since we know we'll soon need it
         this.getGoogleMaps()
     }
 
     componentDidMount() {
+        // this.getCurrentLocation()
         // Once the Google Maps API has finished loading, initialize the map
         this.getGoogleMaps().then(google => {
             const uluru = { lat: 53.2, lng: 50.15 }
@@ -164,6 +184,26 @@ class SearchPlacesPage extends Component {
                     location: place.name,
                 })
             })
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    const location  = new google.maps.LatLng(pos['lat'], pos['lng']);
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({'latLng': location}, (results, status) => {
+                        if(status == google.maps.GeocoderStatus.OK) {
+                            this.setState({
+                                currentLatLng: location,
+                                currentLocation: results[0]
+                            })
+                        }
+                    });
+                })
+            }
+
         })
     }
 
@@ -181,6 +221,8 @@ class SearchPlacesPage extends Component {
                         onSearch={this.onSearch}
                         places={this.state.places}
                         onLuckySearch={this.onLuckySearch}
+                        useCurrentLocation={this.state.useCurrentLocation}
+                        handleCheckbox={this.setCurrentLocation}
                     />
                 }
             />
