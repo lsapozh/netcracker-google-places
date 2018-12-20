@@ -46,7 +46,7 @@ const SearchTicketsPageView = ({
                         margin="normal"
                     />
                 </Grid>
-                <Grid item style={{marginBottom: 8}}>
+                <Grid item style={{ marginBottom: 8 }}>
                     <DatePicker
                         keyboard
                         format="dd/MM/yyyy"
@@ -75,7 +75,7 @@ const SearchTicketsPageView = ({
                         animateYearScrolling
                     />
                 </Grid>
-                <Grid item style={{marginBottom: 8}}>
+                <Grid item style={{ marginBottom: 8 }}>
                     <DatePicker
                         keyboard
                         format="dd/MM/yyyy"
@@ -120,7 +120,11 @@ const SearchTicketsPageView = ({
 
         {tickets ? <TicketsList tickets={tickets} /> : null}
         {ticketsNotFound ? (
-            <Typography component="h2" variant="display1" style={{padding: 30}}>
+            <Typography
+                component="h2"
+                variant="display1"
+                style={{ padding: 30 }}
+            >
                 Tickets not found
             </Typography>
         ) : null}

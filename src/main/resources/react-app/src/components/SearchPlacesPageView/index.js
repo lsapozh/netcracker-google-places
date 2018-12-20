@@ -9,8 +9,8 @@ import InputLabel from '@material-ui/core/InputLabel'
 import PlacesList from '../../containers/PlacesList'
 import PLACE_TYPES from '../../constants/places'
 import Checkbox from '@material-ui/core/Checkbox/Checkbox'
-import Typography from '@material-ui/core/Typography';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Typography from '@material-ui/core/Typography'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
 
 export const LocationInput = ({ location, handleChange }) => (
     <TextField
@@ -34,10 +34,10 @@ const SearchPlacesPageView = ({
     onSearch,
     places,
     onLuckySearch,
-                                  useCurrentLocation,
-                                  handleCheckbox,
-                                  placesNotFound,
-                                  disableCurrentLocation
+    useCurrentLocation,
+    handleCheckbox,
+    placesNotFound,
+    disableCurrentLocation,
 }) => (
     <Paper style={{ padding: '20px 30px' }}>
         <form style={{ padding: '20px 30px' }}>
@@ -119,7 +119,11 @@ const SearchPlacesPageView = ({
 
         {places ? <PlacesList places={places} /> : null}
         {placesNotFound ? (
-            <Typography component="h2" variant="display1" style={{padding: 30}}>
+            <Typography
+                component="h2"
+                variant="display1"
+                style={{ padding: 30 }}
+            >
                 Places not found
             </Typography>
         ) : null}

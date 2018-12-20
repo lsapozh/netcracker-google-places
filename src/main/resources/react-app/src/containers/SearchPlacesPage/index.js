@@ -14,7 +14,7 @@ class SearchPlacesPage extends Component {
         markers: [],
         useCurrentLocation: false,
         placesNotFound: false,
-        disableCurrentLocation: true
+        disableCurrentLocation: true,
     }
 
     handleChange = event => {
@@ -50,7 +50,7 @@ class SearchPlacesPage extends Component {
         this.removeMarkers()
         this.setState({
             places: [],
-            placesNotFound: false
+            placesNotFound: false,
         })
     }
 
@@ -62,12 +62,12 @@ class SearchPlacesPage extends Component {
             }&duration=${this.state.duration}&type=${this.state.placeType}`,
         )
             .then(response => {
-                if (response.status === 500) throw "Places not found"
+                if (response.status === 500) throw 'Places not found'
                 return response.json()
             })
             .then(data => this.onDataLoad(data))
             .catch(reason => {
-                this.setState({placesNotFound: true })
+                this.setState({ placesNotFound: true })
             })
     }
 
@@ -77,21 +77,21 @@ class SearchPlacesPage extends Component {
         const lng = this.randomInteger(45, 55)
         fetch(`/api/places/findLucky?lat=${lat}&lng=${lng}`)
             .then(response => {
-                if (response.status === 500) throw "Places not found"
+                if (response.status === 500) throw 'Places not found'
                 return response.json()
             })
             .then(data => this.onDataLoad(data))
-            .catch(reason => this.setState({placesNotFound: true }))
+            .catch(reason => this.setState({ placesNotFound: true }))
     }
 
     randomInteger = (min, max) => {
         let rand = min - 0.5 + Math.random() * (max - min + 1)
-        rand = Math.round(rand);
-        return rand;
+        rand = Math.round(rand)
+        return rand
     }
 
     removeMarkers = () => {
-       this.state.markers.forEach(m => m.setMap(null))
+        this.state.markers.forEach(m => m.setMap(null))
     }
 
     renderPlacesOnMap = places => {
@@ -121,7 +121,7 @@ class SearchPlacesPage extends Component {
             bounds.extend(position)
             this.state.map.fitBounds(bounds)
         })
-        this.setState({markers})
+        this.setState({ markers })
     }
 
     getGoogleMaps() {
@@ -156,7 +156,7 @@ class SearchPlacesPage extends Component {
         this.setState({ useCurrentLocation: event.target.checked })
         if (event.target.checked) {
             this.setState({
-                location: "My location",
+                location: 'My location',
                 initLat: this.state.currentLatLng.lat,
                 initLng: this.state.currentLatLng.lng,
             })
@@ -204,28 +204,35 @@ class SearchPlacesPage extends Component {
             })
 
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const pos = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    const location  = new google.maps.LatLng(pos['lat'], pos['lng']);
-                    const geocoder = new google.maps.Geocoder();
-                    geocoder.geocode({'latLng': location}, (results, status) => {
-                        if(status == google.maps.GeocoderStatus.OK) {
-                            this.setState({
-                                currentLatLng: location,
-                                currentLocation: results,
-                                disableCurrentLocation: false
-                            })
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
                         }
-                    });
-                }, (error) => {
-                    console.warn(error)
-                })
+                        const location = new google.maps.LatLng(
+                            pos['lat'],
+                            pos['lng'],
+                        )
+                        const geocoder = new google.maps.Geocoder()
+                        geocoder.geocode(
+                            { latLng: location },
+                            (results, status) => {
+                                if (status == google.maps.GeocoderStatus.OK) {
+                                    this.setState({
+                                        currentLatLng: location,
+                                        currentLocation: results,
+                                        disableCurrentLocation: false,
+                                    })
+                                }
+                            },
+                        )
+                    },
+                    error => {
+                        console.warn(error)
+                    },
+                )
             }
-
-
         })
     }
 
@@ -246,7 +253,9 @@ class SearchPlacesPage extends Component {
                         useCurrentLocation={this.state.useCurrentLocation}
                         handleCheckbox={this.setCurrentLocation}
                         placesNotFound={this.state.placesNotFound}
-                        disableCurrentLocation={this.state.disableCurrentLocation}
+                        disableCurrentLocation={
+                            this.state.disableCurrentLocation
+                        }
                     />
                 }
             />

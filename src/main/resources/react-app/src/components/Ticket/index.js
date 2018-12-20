@@ -62,8 +62,14 @@ const Ticket = ({ ticket }) => {
         currencySymbol,
     } = ticket
 
-    const departureDateFormatted = `${new Date(departureDate).getDate()}/${new Date(departureDate).getMonth() + 1}/${new Date(departureDate).getFullYear()}`
-    const returnDateFormatted = `${new Date(returnDate).getDate()}/${ new Date(returnDate).getMonth() + 1}/${new Date(returnDate).getFullYear()}`
+    const departureDateFormatted = `${new Date(
+        departureDate,
+    ).getDate()}/${new Date(departureDate).getMonth() + 1}/${new Date(
+        departureDate,
+    ).getFullYear()}`
+    const returnDateFormatted = `${new Date(returnDate).getDate()}/${new Date(
+        returnDate,
+    ).getMonth() + 1}/${new Date(returnDate).getFullYear()}`
     return (
         <Paper
             style={{

@@ -64,9 +64,12 @@ class SearchTicketsPage extends Component {
                     ? outboundAirline.Name
                     : ''
                 const inboundAirline = data.Carriers.find(
-                    carrier => carrier.CarrierId === quote.InboundLeg.CarrierIds[0],
+                    carrier =>
+                        carrier.CarrierId === quote.InboundLeg.CarrierIds[0],
                 )
-                const inboundAirlineName = inboundAirline ? inboundAirline.Name : ''
+                const inboundAirlineName = inboundAirline
+                    ? inboundAirline.Name
+                    : ''
                 const departureDate = quote.OutboundLeg.DepartureDate
                 const returnDate = quote.InboundLeg.DepartureDate
                 const currencySymbol = '$'
@@ -99,7 +102,6 @@ class SearchTicketsPage extends Component {
             })
             this.setState({ tickets })
         }
-
     }
 
     formatDate = date => {
@@ -119,7 +121,7 @@ class SearchTicketsPage extends Component {
         return fetch(url, {
             headers: {
                 'X-RapidAPI-Key':
-                // 'd8feb41877msha2eca9d57d913cap172a98jsn9481446e52eb'
+                    // 'd8feb41877msha2eca9d57d913cap172a98jsn9481446e52eb'
                     'Td24bfq18lmsh5KqGTIsh6amrNJRp1h4MngjsnIdn2a8CFcrl5',
             },
         })
