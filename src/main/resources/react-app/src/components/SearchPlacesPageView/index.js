@@ -8,6 +8,9 @@ import MenuItem from '@material-ui/core/MenuItem'
 import InputLabel from '@material-ui/core/InputLabel'
 import PlacesList from '../../containers/PlacesList'
 import PLACE_TYPES from '../../constants/places'
+import Checkbox from '@material-ui/core/Checkbox/Checkbox'
+import Typography from '@material-ui/core/Typography';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 export const LocationInput = ({ location, handleChange }) => (
     <TextField
@@ -31,9 +34,24 @@ const SearchPlacesPageView = ({
     onSearch,
     places,
     onLuckySearch,
+                                  useCurrentLocation,
+                                  handleCheckbox,
+                                  placesNotFound,
+                                  disableCurrentLocation
 }) => (
     <Paper style={{ padding: '20px 30px' }}>
         <form style={{ padding: '20px 30px' }}>
+            <FormControlLabel
+                control={
+                    <Checkbox
+                        checked={useCurrentLocation}
+                        onChange={handleCheckbox}
+                        value="useCurrentLocation"
+                        disabled={disableCurrentLocation}
+                    />
+                }
+                label="Use current location"
+            />
             <LocationInput location={location} handleChange={handleChange} />
             <TextField
                 name={'radius'}
@@ -100,6 +118,11 @@ const SearchPlacesPageView = ({
         <div id="map" style={{ height: 600, margin: '20px 30px' }} />
 
         {places ? <PlacesList places={places} /> : null}
+        {placesNotFound ? (
+            <Typography component="h2" variant="display1" style={{padding: 30}}>
+                Places not found
+            </Typography>
+        ) : null}
     </Paper>
 )
 export default SearchPlacesPageView

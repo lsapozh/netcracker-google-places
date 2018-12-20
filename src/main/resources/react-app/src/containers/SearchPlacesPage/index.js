@@ -11,7 +11,10 @@ class SearchPlacesPage extends Component {
         placeType: '',
         initLat: null,
         initLng: null,
-        markers: []
+        markers: [],
+        useCurrentLocation: false,
+        placesNotFound: false,
+        disableCurrentLocation: true
     }
 
     handleChange = event => {
@@ -43,24 +46,42 @@ class SearchPlacesPage extends Component {
         }
     }
 
-    onSearch = () => {
+    clearResults = () => {
         this.removeMarkers()
+        this.setState({
+            places: [],
+            placesNotFound: false
+        })
+    }
+
+    onSearch = () => {
+        this.clearResults()
         fetch(
             `api/places/find?lat=${this.state.initLat()}&lng=${this.state.initLng()}&radius=${
                 this.state.radius
             }&duration=${this.state.duration}&type=${this.state.placeType}`,
         )
-            .then(response => response.json())
+            .then(response => {
+                if (response.status === 500) throw "Places not found"
+                return response.json()
+            })
             .then(data => this.onDataLoad(data))
+            .catch(reason => {
+                this.setState({placesNotFound: true })
+            })
     }
 
     onLuckySearch = () => {
-        this.removeMarkers()
+        this.clearResults()
         const lat = this.randomInteger(45, 60)
         const lng = this.randomInteger(45, 55)
         fetch(`/api/places/findLucky?lat=${lat}&lng=${lng}`)
-            .then(response => response.json())
+            .then(response => {
+                if (response.status === 500) throw "Places not found"
+                return response.json()
+            })
             .then(data => this.onDataLoad(data))
+            .catch(reason => this.setState({placesNotFound: true }))
     }
 
     randomInteger = (min, max) => {
@@ -131,6 +152,23 @@ class SearchPlacesPage extends Component {
         return this.googleMapsPromise
     }
 
+    setCurrentLocation = event => {
+        this.setState({ useCurrentLocation: event.target.checked })
+        if (event.target.checked) {
+            this.setState({
+                location: "My location",
+                initLat: this.state.currentLatLng.lat,
+                initLng: this.state.currentLatLng.lng,
+            })
+        } else {
+            this.setState({
+                location: '',
+                initLat: null,
+                initLng: null,
+            })
+        }
+    }
+
     componentWillMount() {
         // Start Google Maps API loading since we know we'll soon need it
         this.getGoogleMaps()
@@ -164,6 +202,28 @@ class SearchPlacesPage extends Component {
                     location: place.name,
                 })
             })
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    const location  = new google.maps.LatLng(pos['lat'], pos['lng']);
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({'latLng': location}, (results, status) => {
+                        if(status == google.maps.GeocoderStatus.OK) {
+                            this.setState({
+                                currentLatLng: location,
+                                currentLocation: results,
+                                disableCurrentLocation: false
+                            })
+                        }
+                    });
+                })
+            }
+
+
         })
     }
 
@@ -181,6 +241,10 @@ class SearchPlacesPage extends Component {
                         onSearch={this.onSearch}
                         places={this.state.places}
                         onLuckySearch={this.onLuckySearch}
+                        useCurrentLocation={this.state.useCurrentLocation}
+                        handleCheckbox={this.setCurrentLocation}
+                        placesNotFound={this.state.placesNotFound}
+                        disableCurrentLocation={this.state.disableCurrentLocation}
                     />
                 }
             />
