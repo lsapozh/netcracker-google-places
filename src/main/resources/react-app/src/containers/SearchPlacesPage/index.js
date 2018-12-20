@@ -12,8 +12,9 @@ class SearchPlacesPage extends Component {
         initLat: null,
         initLng: null,
         markers: [],
-        useCurrentLocation: false
-
+        useCurrentLocation: false,
+        placesNotFound: false,
+        disableCurrentLocation: true
     }
 
     handleChange = event => {
@@ -45,24 +46,42 @@ class SearchPlacesPage extends Component {
         }
     }
 
-    onSearch = () => {
+    clearResults = () => {
         this.removeMarkers()
+        this.setState({
+            places: [],
+            placesNotFound: false
+        })
+    }
+
+    onSearch = () => {
+        this.clearResults()
         fetch(
             `api/places/find?lat=${this.state.initLat()}&lng=${this.state.initLng()}&radius=${
                 this.state.radius
             }&duration=${this.state.duration}&type=${this.state.placeType}`,
         )
-            .then(response => response.json())
+            .then(response => {
+                if (response.status === 500) throw "Places not found"
+                return response.json()
+            })
             .then(data => this.onDataLoad(data))
+            .catch(reason => {
+                this.setState({placesNotFound: true })
+            })
     }
 
     onLuckySearch = () => {
-        this.removeMarkers()
+        this.clearResults()
         const lat = this.randomInteger(45, 60)
         const lng = this.randomInteger(45, 55)
         fetch(`/api/places/findLucky?lat=${lat}&lng=${lng}`)
-            .then(response => response.json())
+            .then(response => {
+                if (response.status === 500) throw "Places not found"
+                return response.json()
+            })
             .then(data => this.onDataLoad(data))
+            .catch(reason => this.setState({placesNotFound: true }))
     }
 
     randomInteger = (min, max) => {
@@ -156,7 +175,6 @@ class SearchPlacesPage extends Component {
     }
 
     componentDidMount() {
-        // this.getCurrentLocation()
         // Once the Google Maps API has finished loading, initialize the map
         this.getGoogleMaps().then(google => {
             const uluru = { lat: 53.2, lng: 50.15 }
@@ -197,12 +215,14 @@ class SearchPlacesPage extends Component {
                         if(status == google.maps.GeocoderStatus.OK) {
                             this.setState({
                                 currentLatLng: location,
-                                currentLocation: results[0]
+                                currentLocation: results,
+                                disableCurrentLocation: false
                             })
                         }
                     });
                 })
             }
+
 
         })
     }
@@ -223,6 +243,8 @@ class SearchPlacesPage extends Component {
                         onLuckySearch={this.onLuckySearch}
                         useCurrentLocation={this.state.useCurrentLocation}
                         handleCheckbox={this.setCurrentLocation}
+                        placesNotFound={this.state.placesNotFound}
+                        disableCurrentLocation={this.state.disableCurrentLocation}
                     />
                 }
             />
